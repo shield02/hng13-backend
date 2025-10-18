@@ -2,4 +2,6 @@
 .git/
 .env
 
-__pycache__.py
+__pychache__/
+app/__pycache__/
+test/__pycache__/
