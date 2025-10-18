@@ -3,7 +3,7 @@ ifneq (,$(wildcard .env))
 	export $(shell sed 's/=.*//' .env)
 endif
 
-APP_NAME ?= flask-cat-api
+APP_NAME ?= stage0-task
 PORT ?= 5000
 PYTHON ?= python3
 VENV_DIR ?= .venv
