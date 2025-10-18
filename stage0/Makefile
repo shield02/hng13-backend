@@ -75,6 +75,7 @@ deploy: check-env
 	@git commit -m "Deploying to Heroku" || true
 	@git push https://git.heroku.com/$(HEROKU_APP_NAME).git HEAD:main
 	@echo "Deployment complete!"
+	@heroku open -a $(HEROKU_APP_NAME)
 
 clean:
 	@echo "Cleaning up temporary files..."
