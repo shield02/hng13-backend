@@ -1,0 +1,7 @@
+.venv/
+.git/
+.env
+
+__pychache__/
+app/__pycache__/
+test/__pycache__/
