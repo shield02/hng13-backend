@@ -1,0 +1,41 @@
+services:
+  web:
+    build: .
+    container_name: flask_countries_app
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: production
+      DATABASE_URL: mysql+pymysql://hng13:stage2@db:3306/countries_db
+      FLASK_APP: app.py
+    volumes:
+      - .:/app
+      - cache_data:/app/cache
+    command: >
+      sh -c "flask db upgrade && gunicorn -b 0.0.0.0:5000 app:app"
+
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: countries_db
+      MYSQL_USER: hng13
+      MYSQL_PASSWORD: stage2
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+  cache_data:
