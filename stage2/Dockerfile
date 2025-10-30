@@ -29,10 +29,10 @@ COPY . .
 # Expose Flask port
 EXPOSE 5000
 
-ENV FLASK_APP=app.py
+ENV FLASK_APP=wsgi.py FLASK_ENV=production
 
 # Ensure logs output correctly
 ENV PYTHONUNBUFFERED=1
 
 # Gunicorn for production
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--workers=4", "--bind=0.0.0.0:5000", "wsgi:app"]
