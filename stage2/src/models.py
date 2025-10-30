@@ -10,14 +10,14 @@ class Country(db.Model):
     capital = db.Column(db.String(128))
     region = db.Column(db.String(64))
     population = db.Column(db.BigInteger)
-    currency_code = db.Column(db.String(8), nullable=False)
-    exchange_rate = db.Column(db.Float)
-    estimated_gdp = db.Column(db.Float)
+    currency_code = db.Column(db.String(8), nullable=True)
+    exchange_rate = db.Column(db.Float, nullable=True)
+    estimated_gdp = db.Column(db.Float, nullable=True)
     flag_url = db.Column(db.String(255))
     last_refreshed_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
 class Meta(db.Model):
     __tablename__ = 'meta'
 
-    id = db.Column(db.Integer, primary_key=True)
-    last_refreshed_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    key = db.Column(db.String(100), primary_key=True)
+    value = db.Column(db.Text)
