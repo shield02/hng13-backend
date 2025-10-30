@@ -1,20 +1,21 @@
 services:
   web:
     build: .
-    container_name: flask_countries_app
+    container_name: currency_exchange
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "5000:5000"
     environment:
       FLASK_ENV: production
-      DATABASE_URL: mysql+pymysql://hng13:stage2@db:3306/countries_db
-      FLASK_APP: app.py
+      DATABASE_URL: mysql+pymysql://hng13:stage2@db:3306/country_currency_exchange
+      FLASK_APP: wsgi.py
     volumes:
       - .:/app
       - cache_data:/app/cache
     command: >
-      sh -c "flask db upgrade && gunicorn -b 0.0.0.0:5000 app:app"
+      sh -c "gunicorn -b 0.0.0.0:5000 wsgi:app"
 
   db:
     image: mysql:8.0
@@ -22,7 +23,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: countries_db
+      MYSQL_DATABASE: country_currency_exchange
       MYSQL_USER: hng13
       MYSQL_PASSWORD: stage2
     ports:
