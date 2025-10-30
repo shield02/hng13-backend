@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
 
-CACHE_DIR = os.path.join(os.path.dirname(__file__), 'cache')
+CACHE_DIR = os.path.join(os.path.dirname(__file__), '..', 'cache')
 
 os.makedirs(CACHE_DIR, exist_ok=True)
 
