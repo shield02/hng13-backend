@@ -21,7 +21,8 @@ def validate_country_payload(country):
         errors['population'] = 'is required'
 
     currencies = country.get('currencies')
-    if currencies is None:
+    currency_code = pick_currency_code(currencies)
+    if not currency_code:
         errors['currency_code'] = 'is required'
 
     return errors
