@@ -59,31 +59,26 @@ def refresh_all(timeout_seconds=30):
     session = db.session()
     try:
         for country in countries:
-            validation_errors = validate_country_payload(country)
-            if validation_errors:
-                session.rollback()
-                return {
-                    "error": "Validation failed",
-                    "details": validation_errors
-                }, 400
-
             name = country.get('name')
             population = country.get('population')
             capital = country.get('capital')
             region = country.get('region')
             flag = country.get('flag')
-            currency_code = pick_currency_code(country.get('currencies'))
+            currencies = country.get('currencies')
+            currency_code = pick_currency_code(currencies)
 
-            exchange_rate = None
-            estimated_gdp = None
-
-            if currency_code is None:
+            if not currencies or len(currencies) == 0:
+                currency_code = None
+                exchange_rate = None
                 estimated_gdp = 0
+
+            elif currency_code not in rates:
+                exchange_rate = None
+                estimated_gdp = None
+
             else:
-                rate = rates.get(currency_code)
-                if rate is not None:
-                    exchange_rate = rate
-                    estimated_gdp = compute_estimated_gdp(population, exchange_rate)
+                exchange_rate = rates[currency_code]
+                estimated_gdp = compute_estimated_gdp(population, exchange_rate)
 
             existing = session.query(Country).filter(
                 func.lower(Country.name) == name.lower()
