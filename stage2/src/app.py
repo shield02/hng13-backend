@@ -7,6 +7,7 @@ from .models import Country, Meta
 from .services.refresh_service import refresh_all, ExternalAPIError
 
 def create_app(config: Config):
+    """Factory function to create and configure the Flask app."""
     app = Flask(__name__)
     app.config.from_object(config)
 
@@ -16,14 +17,27 @@ def create_app(config: Config):
         # create tables if they don't exist
         db.create_all()
 
+    @app.route('/')
+    def home():
+        return "Welcome to Countries Currency Exchange App"
+
     @app.route('/countries/refresh', methods=['POST'])
     def refresh():
         try:
             result = refresh_all(timeout_seconds=Config.REFRESH_TIMEOUT_SECONDS)
+
+            if isinstance(result, tuple):
+                data, status = result
+            else:
+                data, status = result, 200
+
+            if "error" in data:
+                return jsonify(data), status
+
             return jsonify({
                 'message': 'Refresh Completed',
-                'total_countries': result['total'],
-                'last_refreshed_at': result['last_refreshed_at'],
+                'total_countries': data['total'],
+                'last_refreshed_at': data['last_refreshed_at'],
             })
         except ExternalAPIError as e:
             return jsonify({
@@ -32,7 +46,7 @@ def create_app(config: Config):
             ), 503
         except Exception as e:
             app.logger.exception('Refresh failed')
-            return jsonify({'error': 'Internal server error'}), 500
+            return jsonify({'error': f'Internal server error: {e}'}), 500
 
     @app.route('/countries', methods=['GET'])
     def countries():
@@ -82,15 +96,28 @@ def create_app(config: Config):
             'capital': country.capital,
             'region': country.region,
             'currency_code': country.currency_code,
-            'estimated_gdp': country.estimated_gdp
+            'exchange_rate': country.exchange_rate,
+            'estimated_gdp': country.estimated_gdp,
+            'flag_url': country.flag_url,
+            'last_refreshed_at': country.last_refreshed_at,
         })
 
     @app.route('/countries/image', methods=['GET'])
     def country_image():
-        file_path = os.path.join(os.getcwd(), 'static', 'summary.png')
-        if not os.path.exists(file_path):
-            return jsonify({'error': 'Summary image not found'}), 404
-        return send_file(file_path, mimetype='image/png')
+        try:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            file_path = os.path.join(base_dir, 'cache', 'summary.png')
+            file_path = os.path.abspath(file_path)
+
+            if not os.path.exists(file_path):
+                return jsonify({
+                    'error': 'Summary image not found'
+                }), 404
+
+            return send_file(file_path, mimetype='image/png', max_age=0)
+        except Exception as e:
+            app.logger.error(f"Error sending image: {e}")
+            return jsonify({'error': 'Could not send image'}), 500
 
     @app.route('/status', methods=['GET'])
     def status():
@@ -123,3 +150,5 @@ def create_app(config: Config):
         except Exception as e:
             db.session.rollback()
             return jsonify({"error": "Internal server error"}), 500
+
+    return app
