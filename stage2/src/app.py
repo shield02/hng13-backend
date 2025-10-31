@@ -13,9 +13,14 @@ def create_app(config: Config):
 
     db.init_app(app)
 
-    with app.app_context():
-        # create tables if they don't exist
-        db.create_all()
+    if os.getenv("RUN_MAIN") == "true":
+        with app.app_context():
+            try:
+                db.create_all()
+                print("Database tables created successfully.")
+            except Exception as e:
+                pass
+                print(f"Skipped table creation due to: {e}")
 
     @app.route('/')
     def home():
