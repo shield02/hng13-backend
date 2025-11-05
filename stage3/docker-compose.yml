@@ -1,0 +1,26 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eco_mind_api
+    ports:
+      - "8800:8000"
+    env_file: .env
+    volumes:
+      - .:/app
+      - /app/__pycache__
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: eco_mind_redis
+    ports:
+      - "6389:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
